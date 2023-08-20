@@ -71,8 +71,19 @@ require('lazy').setup({
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
 
+  -- Restore last edit place
+  'farmergreg/vim-lastplace',
+
+  -- Surrounding
+  'tpope/vim-surround',
+
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
+
+  -- Harpoon
+  'ThePrimeagen/harpoon',
+  -- Plenary is a dependency of Harpoon
+  'nvim-lua/plenary.nvim',
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -137,6 +148,9 @@ require('lazy').setup({
     priority = 1000,
     config = function()
       vim.cmd.colorscheme 'onedark'
+      -- Make the background transparent
+      vim.api.nvim_set_hl(0, 'Normal', { bg = 'none' })
+      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = 'none' })
     end,
   },
 
@@ -210,7 +224,7 @@ require('lazy').setup({
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {})
 
 -- [[ Setting options ]]
@@ -222,14 +236,25 @@ vim.o.hlsearch = false
 
 -- Make line numbers default
 vim.wo.number = true
+-- Relative line numbers
+vim.wo.relativenumber = true
+
+-- Scroll padding
+vim.opt.scrolloff = 7
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
 
+-- Enable 80 character limit line
+vim.opt.colorcolumn = '79'
+
+-- Set the default terminal emulator
+vim.opt.shell = 'fish'
+
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.o.clipboard = 'unnamedplus'
+-- vim.o.clipboard = 'unnamedplus'
 
 -- Enable break indent
 vim.o.breakindent = true
@@ -309,11 +334,25 @@ vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { de
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
+-- Harpoon commands
+vim.keymap.set('n', '<leader>ha', require('harpoon.mark').add_file, { desc = '[H]arpoon [A]dd File' })
+vim.keymap.set('n', '<leader>hm', require('harpoon.ui').toggle_quick_menu, { desc = '[H]arpoon [M]enu' })
+
+vim.keymap.set('n', '<leader>ht1', function()
+  require('harpoon.term').gotoTerminal(1)
+end, { desc = '[H]arpoon [T]erm [1]' })
+vim.keymap.set('n', '<leader>ht2', function()
+  require('harpoon.term').gotoTerminal(2)
+end, { desc = '[H]arpoon [T]erm [2]' })
+vim.keymap.set('n', '<leader>ht3', function()
+  require('harpoon.term').gotoTerminal(3)
+end, { desc = '[H]arpoon [T]erm [3]' })
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'javascript', 'vimdoc', 'vim' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -439,7 +478,7 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
+  tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
   lua_ls = {
